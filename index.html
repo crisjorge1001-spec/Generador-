@@ -15,6 +15,8 @@ h1{font-size:1.25rem;margin:4px 0 10px}
 .tabs button{margin:0;padding:10px;background:var(--card);border:1px solid var(--line);font-size:.9rem}
 .tabs button.on{background:var(--acc);border-color:var(--acc)}
 label{display:block;margin:12px 0 5px;font-size:.82rem;color:var(--mut)}
+label.chk{display:flex;align-items:center;gap:8px;color:var(--txt);font-size:.95rem}
+label.chk input{width:auto}
 textarea,select,input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:1rem}
 textarea{min-height:90px;resize:vertical}
 button{width:100%;margin-top:12px;padding:13px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-size:1rem;font-weight:600}
@@ -23,22 +25,22 @@ button.small{font-size:.9rem;padding:10px;margin-top:8px}
 button:disabled{opacity:.5}
 .row{display:flex;gap:8px}
 .row>*{flex:1}
-.err{color:#ff8a8a}
-#msg,#keymsg,#hmsg{margin-top:12px;text-align:center;color:var(--mut);white-space:pre-wrap;font-size:.9rem}
+#msg,#keymsg,#hmsg,#plan{margin-top:12px;text-align:center;color:var(--mut);white-space:pre-wrap;font-size:.9rem}
+#plan{margin-top:6px;font-size:.82rem}
 #keymsg{text-align:left}
-#msg.err,#keymsg.err,#hmsg.err{color:#ff8a8a}
+#msg.err,#keymsg.err,.err{color:#ff8a8a}
 #preview,#preview2,#viewer img{width:100%;border-radius:12px;margin-top:12px}
-.results{display:grid;gap:8px;margin-top:12px}
-.results.multi{grid-template-columns:1fr 1fr}
-.rcard img{width:100%;border-radius:12px;display:block}
-.rcard .lbl{font-size:.78rem;color:var(--mut);margin-bottom:4px}
-.rcard button{font-size:.8rem;padding:8px;margin-top:6px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.92rem}
+.res{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.res.multi{grid-template-columns:1fr 1fr}
+.res .card{margin:0;padding:8px;font-size:.8rem}
+.res .card button{font-size:.8rem;padding:8px;margin-top:6px}
+#out .res img{width:100%;margin:0;border-radius:8px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
-.cell{position:relative}
-.cell img,.cell .ph{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
-.cell .ph{display:flex;align-items:center;justify-content:center;background:var(--card);font-size:2rem}
-.cell .star{position:absolute;top:3px;right:5px;font-size:1rem}
+.grid .tile{position:relative;aspect-ratio:1}
+.grid .tile img{width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.grid .tile.ph{display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:8px;border:1px solid var(--line);font-size:2rem}
+.grid .star{position:absolute;top:4px;right:4px;font-size:1rem;text-shadow:0 0 4px #000}
 .hide{display:none}
 details{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 summary{color:var(--mut);font-size:.9rem}
@@ -82,21 +84,25 @@ summary{color:var(--mut);font-size:.9rem}
       <option value="768x1344">Vertical (historias)</option>
       <option value="1344x768">Horizontal</option>
     </select>
-    <label>Cantidad (cada imagen gasta saldo)</label>
-    <select id="variants">
-      <option value="1">1 imagen</option>
-      <option value="2">2 variaciones</option>
-      <option value="4">4 variaciones</option>
-      <option value="cmp">Comparar 2 modelos</option>
-    </select>
   </div>
 
-  <label id="modelLabel">Modelo (algunos gastan más saldo)</label>
+  <label>Modelo (algunos gastan más saldo)</label>
   <select id="model"></select>
-  <div id="model2Box" class="hide">
-    <label>Modelo B</label>
+
+  <label>Cantidad de versiones</label>
+  <select id="count">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
+
+  <label class="chk"><input type="checkbox" id="cmp"> Comparar con otro modelo</label>
+  <div id="cmpBox" class="hide">
+    <label>Segundo modelo</label>
     <select id="model2"></select>
   </div>
+  <div id="plan"></div>
 
   <button id="go">Generar</button>
   <div id="msg"></div>
@@ -112,18 +118,18 @@ summary{color:var(--mut);font-size:.9rem}
 </div>
 
 <div id="histBox" class="hide">
-  <div class="row">
-    <select id="hFilter">
-      <option value="all">Todas</option>
-      <option value="fav">⭐ Favoritas</option>
-    </select>
-    <input id="hSearch" placeholder="Buscar...">
-  </div>
-  <button class="sec small" id="exportZip">📦 Exportar lo que se ve (ZIP)</button>
+  <input id="hsearch" placeholder="🔎 Buscar en tus descripciones">
+  <button class="sec small" id="hfav">☆ Ver solo favoritos</button>
   <div id="hmsg"></div>
   <div id="grid" class="grid"></div>
   <div id="viewer"></div>
-  <button class="sec small" id="clearHist">Borrar todo el historial</button>
+  <div class="row">
+    <button class="sec small" id="expAll">📦 Exportar todo</button>
+    <button class="sec small" id="expFav">📦 Exportar favoritos</button>
+  </div>
+  <button class="sec small" id="imp">📥 Importar respaldo</button>
+  <input id="impFile" type="file" accept=".json,application/json" class="hide">
+  <button class="sec small" id="clearHist">🧹 Borrar las que no son favoritas</button>
 </div>
 
 <details id="keybox">
@@ -138,10 +144,11 @@ summary{color:var(--mut);font-size:.9rem}
 const $ = id => document.getElementById(id);
 const API = 'https://gen.pollinations.ai';
 const TABS = ['create', 'photo', 'describe', 'hist'];
+const KEEP = 60; // imágenes no favoritas que se conservan
 let mode = 'create';
 let photo = null, photo2 = null;
 let lastBal = null, balDenied = false;
-let histShown = [];
+let histItems = [], favOnly = false;
 
 const styles = {
   "": "",
@@ -171,7 +178,7 @@ const EDIT_MODELS = [
   ['bytedance/seedream-4.0', 'Seedream 4'],
   ['prunaai/p-image-edit', 'P-Image Edit']
 ];
-const modelName = v => { const m = [...GEN_MODELS, ...EDIT_MODELS].find(x => x[0] === v); return m ? m[1] : v; };
+const modelName = v => { const m = GEN_MODELS.concat(EDIT_MODELS).find(x => x[0] === v); return m ? m[1] : v; };
 
 /* ---------- utilidades ---------- */
 const getKey = () => ($('key').value || '').replace(/\s+/g, '');
@@ -179,7 +186,6 @@ const auth = () => ({ Authorization: 'Bearer ' + getKey() });
 const fmt = n => Number.isFinite(n) ? String(Math.round(n * 1000) / 1000) : '?';
 function say(t, err) { const m = $('msg'); m.textContent = t; m.className = err ? 'err' : ''; }
 function keysay(t, err) { const m = $('keymsg'); m.textContent = t; m.className = err ? 'err' : ''; }
-function hsay(t, err) { const m = $('hmsg'); m.textContent = t; m.className = err ? 'err' : ''; }
 function btn(text, fn) { const b = document.createElement('button'); b.className = 'sec small'; b.textContent = text; b.onclick = fn; return b; }
 const errText = e => e instanceof TypeError ? 'No pude conectar con el servicio (red o bloqueo del navegador).' : (e.message || String(e));
 function explain(s) {
@@ -201,14 +207,14 @@ function b64ToBlob(b64) {
   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
   return new Blob([arr], { type: 'image/png' });
 }
-async function saveBlob(blob, name = 'imagen.png') {
-  const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
+async function saveBlob(blob) {
+  const file = new File([blob], 'imagen.png', { type: blob.type || 'image/png' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file] }); return; }
     catch (e) { if (e.name === 'AbortError') return; }
   }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  a.href = URL.createObjectURL(blob); a.download = 'imagen.png'; a.click();
 }
 function resizePhoto(file, max = 1024) {
   return new Promise((res, rej) => {
@@ -251,50 +257,6 @@ async function refreshBalance() {
 }
 $('refBal').onclick = () => { balDenied = false; refreshBalance(); };
 
-/* ---------- ZIP (sin compresión) ---------- */
-const crcTable = (() => {
-  const t = new Uint32Array(256);
-  for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
-  return t;
-})();
-function crc32(buf) {
-  let c = 0xFFFFFFFF;
-  for (let i = 0; i < buf.length; i++) c = crcTable[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
-  return (c ^ 0xFFFFFFFF) >>> 0;
-}
-async function makeZip(files) {
-  const enc = new TextEncoder();
-  const parts = [], central = [];
-  let offset = 0, cdSize = 0;
-  for (const f of files) {
-    const name = enc.encode(f.name);
-    const size = f.blob.size;
-    const crc = crc32(new Uint8Array(await f.blob.arrayBuffer()));
-    const h = new DataView(new ArrayBuffer(30));
-    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
-    h.setUint16(8, 0, true); h.setUint16(10, 0, true); h.setUint16(12, 0x21, true);
-    h.setUint32(14, crc, true); h.setUint32(18, size, true); h.setUint32(22, size, true);
-    h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
-    parts.push(h.buffer, name, f.blob);
-    const c = new DataView(new ArrayBuffer(46));
-    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true);
-    c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, 0, true); c.setUint16(14, 0x21, true);
-    c.setUint32(16, crc, true); c.setUint32(20, size, true); c.setUint32(24, size, true);
-    c.setUint16(28, name.length, true); c.setUint32(42, offset, true);
-    central.push(c.buffer, name);
-    cdSize += 46 + name.length;
-    offset += 30 + name.length + size;
-  }
-  const e = new DataView(new ArrayBuffer(22));
-  e.setUint32(0, 0x06054b50, true);
-  e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
-  e.setUint32(12, cdSize, true); e.setUint32(16, offset, true);
-  return new Blob([...parts, ...central, e.buffer], { type: 'application/zip' });
-}
-const slug = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'imagen';
-const ext = t => t === 'image/jpeg' ? 'jpg' : t === 'image/webp' ? 'webp' : 'png';
-
 /* ---------- historial (IndexedDB) ---------- */
 const DB = new Promise((ok, bad) => {
   const r = indexedDB.open('studio', 1);
@@ -313,77 +275,108 @@ async function tx(m, fn) {
 const hAdd = it => tx('readwrite', s => s.put(it));
 const hAll = () => tx('readonly', s => s.getAll());
 const hDel = id => tx('readwrite', s => s.delete(id));
-const hClear = () => tx('readwrite', s => s.clear());
+async function prune() {
+  try {
+    const old = (await hAll()).filter(i => !i.fav).sort((a, b) => b.id - a.id).slice(KEEP);
+    for (const it of old) await hDel(it.id);
+  } catch (e) {}
+}
 
-async function renderHist(keepViewer) {
-  const g = $('grid'); g.innerHTML = ''; hsay('');
-  if (!keepViewer) $('viewer').innerHTML = '';
-  let items = [];
-  try { items = (await hAll()).sort((a, b) => b.id - a.id); }
-  catch (e) { histShown = []; hsay('Tu navegador no permite guardar historial.', true); return; }
-  if (!items.length) { histShown = []; hsay('Aún no hay imágenes. ¡Crea la primera!'); return; }
-  const f = $('hFilter').value, q = $('hSearch').value.trim().toLowerCase();
-  items = items.filter(it => (f !== 'fav' || it.fav) && (!q || ((it.prompt || '') + ' ' + modelName(it.model || '')).toLowerCase().includes(q)));
-  histShown = items;
-  if (!items.length) { hsay('No hay resultados con ese filtro.'); return; }
-  items.forEach(it => {
-    const cell = document.createElement('div'); cell.className = 'cell';
-    let el;
-    if (it.blob) { el = new Image(); el.src = URL.createObjectURL(it.blob); }
-    else { el = document.createElement('div'); el.className = 'ph'; el.textContent = '🖼️'; }
-    cell.appendChild(el);
-    if (it.fav) { const s = document.createElement('span'); s.className = 'star'; s.textContent = '⭐'; cell.appendChild(s); }
-    cell.onclick = () => openItem(it);
-    g.appendChild(cell);
+async function renderHist() {
+  $('viewer').innerHTML = ''; $('hmsg').textContent = '';
+  try { histItems = (await hAll()).sort((a, b) => b.id - a.id); }
+  catch (e) { $('grid').innerHTML = ''; $('hmsg').textContent = 'Tu navegador no permite guardar historial.'; return; }
+  drawGrid();
+}
+function drawGrid() {
+  const g = $('grid'); g.innerHTML = '';
+  const q = $('hsearch').value.trim().toLowerCase();
+  const list = histItems.filter(it => (!favOnly || it.fav) && (!q || (it.prompt || '').toLowerCase().includes(q)));
+  $('hmsg').textContent = list.length ? '' : (histItems.length ? 'Nada coincide con tu filtro.' : 'Aún no hay imágenes. ¡Crea la primera!');
+  list.forEach(it => {
+    const t = document.createElement('div'); t.className = 'tile' + (it.blob ? '' : ' ph');
+    if (it.blob) { const im = new Image(); im.src = URL.createObjectURL(it.blob); t.appendChild(im); }
+    else t.textContent = '🖼️';
+    if (it.fav) { const s = document.createElement('span'); s.className = 'star'; s.textContent = '⭐'; t.appendChild(s); }
+    t.onclick = () => openItem(it);
+    g.appendChild(t);
   });
 }
 function openItem(it) {
   const v = $('viewer'); v.innerHTML = '';
   if (it.blob) { const im = new Image(); im.src = URL.createObjectURL(it.blob); v.appendChild(im); }
   const p = document.createElement('p');
-  p.style.cssText = 'color:var(--mut);font-size:.85rem;white-space:pre-wrap';
-  p.textContent = (it.mode === 'photo' ? '📷 ' : '✨ ') + (it.model ? modelName(it.model) + ' · ' : '') +
-    new Date(it.ts || it.id).toLocaleString() + '\n' + it.prompt;
+  p.style.cssText = 'color:var(--mut);font-size:.85rem';
+  p.textContent = (it.mode === 'photo' ? '📷 ' : '✨ ') + (it.label ? it.label + ' · ' : '') + it.prompt;
   v.appendChild(p);
-  v.appendChild(btn(it.fav ? '⭐ Quitar de favoritas' : '☆ Marcar como favorita', async function () {
+  v.appendChild(btn(it.fav ? '⭐ Quitar de favoritos' : '☆ Marcar como favorito', async function () {
     it.fav = !it.fav;
     try { await hAdd(it); } catch (e) {}
-    this.textContent = it.fav ? '⭐ Quitar de favoritas' : '☆ Marcar como favorita';
-    renderHist(true);
+    this.textContent = it.fav ? '⭐ Quitar de favoritos' : '☆ Marcar como favorito';
+    drawGrid();
   }));
   v.appendChild(btn('✏️ Usar esta descripción', () => { $('idea').value = it.base || it.prompt; setTab(it.mode === 'photo' ? 'photo' : 'create'); }));
-  if (it.blob) v.appendChild(btn('💾 Guardar / compartir', () => saveBlob(it.blob, slug(it.prompt) + '.' + ext(it.blob.type))));
-  v.appendChild(btn('🗑 Borrar esta imagen', async () => { await hDel(it.id); renderHist(); }));
+  if (it.blob) v.appendChild(btn('💾 Guardar / compartir', () => saveBlob(it.blob)));
+  v.appendChild(btn('🗑 Borrar esta imagen', async () => {
+    try { await hDel(it.id); } catch (e) {}
+    histItems = histItems.filter(x => x.id !== it.id); v.innerHTML = ''; drawGrid();
+  }));
   v.scrollIntoView({ behavior: 'smooth' });
 }
-$('hFilter').onchange = () => renderHist();
-$('hSearch').oninput = () => renderHist();
-$('clearHist').onclick = async () => {
-  if (confirm('¿Borrar TODO el historial (incluidas las favoritas)?')) { try { await hClear(); } catch (e) {} renderHist(); }
+$('hsearch').oninput = drawGrid;
+$('hfav').onclick = function () {
+  favOnly = !favOnly;
+  this.textContent = favOnly ? '⭐ Mostrando solo favoritos' : '☆ Ver solo favoritos';
+  drawGrid();
 };
-$('exportZip').onclick = async function () {
-  if (!histShown.length) return hsay('No hay imágenes para exportar con este filtro.', true);
-  this.disabled = true; hsay('Preparando ZIP... 📦');
+$('clearHist').onclick = async () => {
+  if (!confirm('¿Borrar todas las imágenes que no son favoritas?')) return;
+  try { for (const it of await hAll()) if (!it.fav) await hDel(it.id); } catch (e) {}
+  renderHist();
+};
+
+/* ---------- respaldo ---------- */
+async function exportBackup(onlyFav) {
+  let items = [];
+  try { items = (await hAll()).filter(i => !onlyFav || i.fav); } catch (e) {}
+  if (!items.length) { $('hmsg').textContent = onlyFav ? 'Aún no tienes favoritos.' : 'No hay nada que exportar.'; return; }
+  $('hmsg').textContent = 'Preparando respaldo de ' + items.length + ' imágenes...';
+  const list = [];
+  for (const it of items) {
+    list.push({ id: it.id, mode: it.mode, prompt: it.prompt, base: it.base, model: it.model, label: it.label,
+      fav: !!it.fav, img: it.blob ? await toDataUrl(it.blob) : null });
+  }
+  const blob = new Blob([JSON.stringify({ app: 'estudio-imagenes', v: 1, items: list })], { type: 'application/json' });
+  const name = 'respaldo-estudio-' + new Date().toISOString().slice(0, 10) + '.json';
+  const file = new File([blob], name, { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); $('hmsg').textContent = 'Respaldo listo ✅'; return; }
+    catch (e) { if (e.name === 'AbortError') { $('hmsg').textContent = ''; return; } }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  $('hmsg').textContent = 'Respaldo descargado ✅ (búscalo en Descargas)';
+}
+$('expAll').onclick = () => exportBackup(false);
+$('expFav').onclick = () => exportBackup(true);
+$('imp').onclick = () => $('impFile').click();
+$('impFile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  let msg;
   try {
-    const files = [], lines = [];
+    const j = JSON.parse(await f.text());
+    if (!j || !Array.isArray(j.items)) throw new Error('el archivo no es un respaldo válido');
     let n = 0;
-    for (const it of histShown) {
+    for (const it of j.items) {
+      const blob = it.img ? await (await fetch(it.img)).blob() : null;
+      await hAdd({ id: it.id, mode: it.mode, prompt: it.prompt, base: it.base, model: it.model, label: it.label, fav: !!it.fav, blob });
       n++;
-      const idx = String(n).padStart(3, '0');
-      let fname = '(sin archivo)';
-      if (it.blob) {
-        fname = idx + '_' + slug(it.prompt) + '.' + ext(it.blob.type);
-        files.push({ name: fname, blob: it.blob });
-      }
-      lines.push(idx + ' | ' + fname + (it.fav ? ' | FAVORITA' : '') + '\n' +
-        new Date(it.ts || it.id).toLocaleString() + (it.model ? ' | ' + it.model : '') + '\nPROMPT: ' + it.prompt + '\n');
     }
-    files.push({ name: 'prompts.txt', blob: new Blob([lines.join('\n')], { type: 'text/plain' }) });
-    const zip = await makeZip(files);
-    await saveBlob(zip, 'mis-imagenes.zip');
-    hsay('Listo ✅ ' + n + ' imágenes exportadas.');
-  } catch (e) { hsay('No pude crear el ZIP: ' + e.message, true); }
-  this.disabled = false;
+    msg = 'Importadas ' + n + ' imágenes ✅';
+  } catch (err) { msg = 'No pude importar: ' + err.message; }
+  await renderHist();
+  $('hmsg').textContent = msg;
+  e.target.value = '';
 };
 
 /* ---------- estilos ---------- */
@@ -421,14 +414,311 @@ $('delStyle').onclick = () => {
   fillStyles(); say('Estilo borrado.');
 };
 
-/* ---------- pestañas ---------- */
+/* ---------- pestañas y controles ---------- */
+function fillSel(sel, list, prev, fallbackIdx) {
+  sel.innerHTML = '';
+  list.forEach(([v, t]) => sel.add(new Option(t, v)));
+  if (list.some(m => m[0] === prev)) sel.value = prev;
+  else sel.selectedIndex = Math.min(fallbackIdx, list.length - 1);
+}
 function fillModels() {
   const list = mode === 'photo' ? EDIT_MODELS : GEN_MODELS;
-  const prev = $('model').value;
-  $('model').innerHTML = '';
-  list.forEach(([v, t]) => $('model').add(new Option(t, v)));
-  if (list.some(m => m[0] === prev)) $('model').value = prev;
-  const m2 = $('model2'), prev2 = m2.value;
-  m2.innerHTML = '';
-  GEN_MODELS.forEach(([v, t]) => m2.add(new Option(t, v)));
-  m2.value = GEN_MOD
+  fillSel($('model'), list, $('model').value, 0);
+  fillSel($('model2'), list, $('model2').value, 1);
+}
+function updatePlan() {
+  const cmp = $('cmp').checked;
+  $('cmpBox').classList.toggle('hide', !cmp);
+  $('count').disabled = cmp;
+  const n = cmp ? 2 : Number($('count').value);
+  $('plan').textContent = n > 1 ? 'Se generarán ' + n + ' imágenes: gasta unas ' + n + ' veces más saldo.' : '';
+}
+$('cmp').onchange = updatePlan;
+$('count').onchange = updatePlan;
+
+function setTab(m) {
+  const changed = m !== mode;
+  mode = m;
+  TABS.forEach(x => $('t-' + x).classList.toggle('on', x === m));
+  const studio = m === 'create' || m === 'photo';
+  $('studio').classList.toggle('hide', !studio);
+  $('describeBox').classList.toggle('hide', m !== 'describe');
+  $('histBox').classList.toggle('hide', m !== 'hist');
+  $('photoBox').classList.toggle('hide', m !== 'photo');
+  $('sizeBox').classList.toggle('hide', m !== 'create');
+  $('promptLabel').textContent = m === 'photo' ? '¿Qué quieres cambiar de la foto?' : '¿Qué quieres crear?';
+  $('idea').placeholder = m === 'photo'
+    ? 'Conviértela en pintura al óleo / ponle un sombrero'
+    : 'Un zorro astronauta caminando en la luna';
+  if (changed) { $('out').innerHTML = ''; say(''); }
+  if (studio) fillModels();
+  if (m === 'hist') renderHist();
+}
+TABS.forEach(x => $('t-' + x).onclick = () => setTab(x));
+
+$('file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    photo = await resizePhoto(f);
+    const p = $('preview'); p.src = URL.createObjectURL(photo); p.classList.remove('hide');
+  } catch (err) { say(err.message, true); }
+};
+
+/* ---------- llave ---------- */
+$('saveKey').onclick = async () => {
+  const k = getKey();
+  if (!k) return keysay('Pega tu llave primero.', true);
+  localStorage.setItem('pkey', k);
+  const warn = k.startsWith('pk_')
+    ? '⚠️ Tu llave empieza con pk_. Para esta app crea una llave secreta (sk_) en enter.pollinations.ai/keys.\n\n' : '';
+  keysay(warn + 'Probando...', !!warn);
+  try {
+    const r = await fetch(API + '/account/balance', { headers: auth() });
+    const t = (await r.text()).slice(0, 200);
+    if (r.ok) { keysay(warn + '✅ Llave válida.\n' + t, !!warn); refreshBalance(); }
+    else if (r.status === 403) keysay(warn + '✅ La llave existe, pero no tiene permiso para ver el saldo.', !!warn);
+    else keysay(warn + '❌ Error ' + r.status + ': ' + explain(r.status) + '\n' + t, true);
+  } catch (e) {
+    keysay(warn + 'No pude hacer la prueba (' + e.message + '). Intenta generar una imagen de todos modos.', true);
+  }
+};
+
+/* ---------- mejorar descripción ---------- */
+$('improve').onclick = async () => {
+  const idea = $('idea').value.trim();
+  if (!idea) return say('Escribe primero tu idea.', true);
+  if (!getKey()) { $('keybox').open = true; return say('Primero pega tu llave en la sección 🔑.', true); }
+  const sys = mode === 'photo'
+    ? 'Rewrite the user request as one clear, concise English instruction for editing a photo. Reply ONLY with the instruction.'
+    : 'You are an expert prompt writer for AI image generators. Rewrite the user idea as ONE vivid, detailed English prompt (subject, setting, lighting, composition, mood, details). Keep the original intent. Reply ONLY with the prompt, no quotes or explanations.';
+  $('improve').disabled = true; say('Mejorando descripción... ✍️');
+  try {
+    const r = await fetch(API + '/v1/chat/completions', {
+      method: 'POST',
+      headers: { ...auth(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'system', content: sys }, { role: 'user', content: idea }] })
+    });
+    if (!r.ok) throw await httpError(r);
+    const j = await r.json();
+    $('idea').value = j.choices[0].message.content.trim();
+    say('Listo ✨ Puedes editarla antes de generar.');
+    refreshBalance();
+  } catch (e) { say(errText(e), true); }
+  $('improve').disabled = false;
+};
+
+/* ---------- describir imagen + opinión ---------- */
+const KEYS = { desc: 'DESCRIPCI[OÓ]N', prompt: 'PROMPT', style: 'ESTILO', crit: 'CR[IÍ]TICA' };
+async function analyze(blob, ctx) {
+  const small = await resizePhoto(blob, 768);
+  const dataUrl = await toDataUrl(small);
+  const sys =
+    'You analyze images for an AI image generation app. Reply in EXACTLY this format and nothing else:\n' +
+    'DESCRIPCION: <1-2 sentences in Spanish saying what the image shows>\n' +
+    'PROMPT: <ONE detailed English prompt that would recreate this image in an AI image generator: subject, pose/action, setting, composition, camera angle, lighting, colors, mood, medium/style>\n' +
+    'ESTILO: <short English phrase describing ONLY the visual style (medium, palette, lighting, rendering), reusable with other subjects>\n' +
+    'CRITICA: <2-3 sentences in Spanish: honest, constructive critique (composition, lighting, color, flaws or artifacts) and one concrete tip to improve it>\n' +
+    'If real people appear, describe them generically and never name anyone.';
+  const text = ctx
+    ? 'This image was generated from this prompt: "' + ctx + '". Analyze it and judge how well it matches.'
+    : 'Analyze this image.';
+  const r = await fetch(API + '/v1/chat/completions', {
+    method: 'POST',
+    headers: { ...auth(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [
+      { role: 'system', content: sys },
+      { role: 'user', content: [{ type: 'text', text }, { type: 'image_url', image_url: { url: dataUrl } }] }
+    ] })
+  });
+  if (!r.ok) throw await httpError(r);
+  const j = await r.json();
+  return j.choices[0].message.content;
+}
+function parseAnalysis(t) {
+  t = t.replace(/\*\*/g, '');
+  const any = Object.values(KEYS).join('|');
+  const o = {};
+  for (const [k, p] of Object.entries(KEYS)) {
+    const m = new RegExp('(?:^|\\n)\\s*' + p + '\\s*:\\s*([\\s\\S]*?)(?=\\n\\s*(?:' + any + ')\\s*:|$)', 'i').exec(t);
+    if (m) o[k] = m[1].trim();
+  }
+  return o;
+}
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) { return false; }
+}
+function renderAnalysis(c, o, raw) {
+  c.innerHTML = ''; c.className = '';
+  if (!o.prompt) { const p = document.createElement('p'); p.style.whiteSpace = 'pre-wrap'; p.textContent = raw; c.appendChild(p); return; }
+  const sec = (title, text, buttons = []) => {
+    const d = document.createElement('div'); d.className = 'card';
+    const h = document.createElement('b'); h.textContent = title;
+    const p = document.createElement('p'); p.textContent = text; p.style.cssText = 'white-space:pre-wrap;margin:6px 0';
+    d.append(h, p, ...buttons); c.appendChild(d);
+  };
+  if (o.desc) sec('📝 Qué veo', o.desc);
+  sec('🪄 Prompt listo para generar', o.prompt, [
+    btn('📋 Copiar', async function () { this.textContent = (await copyText(o.prompt)) ? '✅ Copiado' : 'No se pudo copiar'; }),
+    btn('✨ Usar para crear', () => { $('idea').value = o.prompt; setTab('create'); say('Prompt cargado. Elige estilo y genera.'); })
+  ]);
+  if (o.style) sec('🎨 Estilo', o.style, [
+    btn('Usar como estilo extra', () => { $('custom').value = o.style; setTab('create'); say('Estilo cargado. Si te gusta, toca ⭐ Guardar este estilo.'); })
+  ]);
+  if (o.crit) sec('🧐 Opinión', o.crit);
+}
+$('file2').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    photo2 = await resizePhoto(f);
+    const p = $('preview2'); p.src = URL.createObjectURL(photo2); p.classList.remove('hide');
+  } catch (err) { $('anaOut').textContent = err.message; $('anaOut').className = 'err'; }
+};
+$('analyze').onclick = async () => {
+  const out = $('anaOut');
+  if (!getKey()) { $('keybox').open = true; out.textContent = 'Primero pega tu llave en la sección 🔑.'; out.className = 'err'; return; }
+  if (!photo2) { out.textContent = 'Elige una imagen primero.'; out.className = 'err'; return; }
+  $('analyze').disabled = true; out.className = ''; out.textContent = 'Analizando... 🔍';
+  try {
+    const t = await analyze(photo2);
+    renderAnalysis(out, parseAnalysis(t), t);
+    refreshBalance();
+  } catch (e) { out.textContent = errText(e); out.className = 'err'; refreshBalance(); }
+  $('analyze').disabled = false;
+};
+
+/* ---------- generar (1 a 4 versiones, o comparar modelos) ---------- */
+async function editPhoto(prompt, model) {
+  const fd = new FormData();
+  fd.append('image', photo, 'foto.jpg');
+  fd.append('prompt', prompt);
+  fd.append('model', model);
+  const r = await fetch(API + '/v1/images/edits', { method: 'POST', headers: auth(), body: fd });
+  if (!r.ok) throw await httpError(r);
+  const j = await r.json();
+  const d = j.data && j.data[0];
+  if (d && d.b64_json) return b64ToBlob(d.b64_json);
+  if (d && d.url) return await (await fetch(d.url)).blob();
+  throw new Error('La respuesta no trajo imagen.');
+}
+async function runJob(job, full, key) {
+  if (mode === 'photo') return { blob: await editPhoto(full, job.model), plainUrl: null };
+  const [w, h] = $('size').value.split('x');
+  const url = API + '/image/' + encodeURIComponent(full) + '?model=' + encodeURIComponent(job.model) +
+    '&width=' + w + '&height=' + h + '&seed=' + job.seed;
+  try {
+    const r = await fetch(url, { headers: auth() });
+    if (!r.ok) throw await httpError(r);
+    return { blob: await r.blob(), plainUrl: null };
+  } catch (e) {
+    if (e instanceof TypeError) return { blob: null, plainUrl: url + '&key=' + encodeURIComponent(key) }; // plan B
+    throw e;
+  }
+}
+function addCard(grid, crit, r, job, full, base, cost) {
+  const d = document.createElement('div'); d.className = 'card';
+  const im = new Image(); im.alt = '';
+  im.onerror = () => {
+    const p = document.createElement('p');
+    p.textContent = 'La imagen no se pudo mostrar. Revisa tu llave y tu saldo.';
+    im.replaceWith(p);
+  };
+  im.src = r.blob ? URL.createObjectURL(r.blob) : r.plainUrl;
+  const cap = document.createElement('div');
+  cap.style.cssText = 'margin:6px 0 2px;color:var(--mut)';
+  cap.textContent = job.label + (cost != null ? ' · ' + fmt(cost) + ' pollen' : '');
+  d.append(im, cap);
+
+  const item = { id: Date.now(), mode, prompt: full, base, model: job.model, label: job.label, fav: false, blob: r.blob };
+  hAdd(item).then(prune).catch(() => {});
+
+  if (r.blob) d.appendChild(btn('💾 Guardar', () => saveBlob(r.blob)));
+  d.appendChild(btn('☆ Favorito', async function () {
+    item.fav = !item.fav;
+    this.textContent = item.fav ? '⭐ Favorito' : '☆ Favorito';
+    try { await hAdd(item); } catch (e) {}
+  }));
+  if (r.blob) d.appendChild(btn('🧐 Opinión', async function () {
+    this.disabled = true; crit.className = ''; crit.textContent = 'Analizando... 🔍';
+    crit.scrollIntoView({ behavior: 'smooth' });
+    try {
+      const t = await analyze(r.blob, full);
+      renderAnalysis(crit, parseAnalysis(t), t);
+      const h = document.createElement('p');
+      h.style.cssText = 'color:var(--mut);margin:10px 0 0'; h.textContent = '🧐 Sobre: ' + job.label;
+      crit.prepend(h);
+      refreshBalance();
+    } catch (e) { crit.textContent = errText(e); crit.className = 'err'; }
+    this.disabled = false;
+  }));
+  grid.appendChild(d);
+}
+
+$('go').onclick = async () => {
+  const base = $('idea').value.trim();
+  if (!base) return say('Escribe qué quieres crear.', true);
+  const key = getKey();
+  if (!key) { $('keybox').open = true; return say('Primero pega tu llave en la sección 🔑.', true); }
+  if (mode === 'photo' && !photo) return say('Elige una foto primero.', true);
+  const cmp = $('cmp').checked;
+  if (cmp && $('model').value === $('model2').value) return say('Elige dos modelos distintos para comparar.', true);
+  localStorage.setItem('pkey', key);
+
+  const full = [base, styleText(), $('custom').value.trim()].filter(Boolean).join(', ');
+  const rnd = () => Math.floor(Math.random() * 1e9);
+  const n = cmp ? 2 : Number($('count').value);
+  const seed0 = rnd();
+  const jobs = cmp
+    ? [$('model').value, $('model2').value].map(m => ({ model: m, seed: seed0, label: modelName(m) }))
+    : Array.from({ length: n }, (_, i) => ({
+        model: $('model').value, seed: rnd(),
+        label: n > 1 ? 'Versión ' + (i + 1) : modelName($('model').value)
+      }));
+
+  $('go').disabled = true;
+  const out = $('out'); out.innerHTML = '';
+  const grid = document.createElement('div'); grid.className = 'res' + (jobs.length > 1 ? ' multi' : '');
+  const crit = document.createElement('div');
+  out.append(grid, crit);
+  window.crit = crit; // usado por las tarjetas
+
+  if (!balDenied) await refreshBalance();
+  const start = balDenied ? null : lastBal;
+  let done = 0, failed = false;
+  for (let i = 0; i < jobs.length; i++) {
+    const job = jobs[i];
+    say('Generando ' + (i + 1) + ' de ' + jobs.length + '... ⏳ (puede tardar hasta un minuto)');
+    const before = balDenied ? null : lastBal;
+    try {
+      const r = await runJob(job, full, key);
+      const after = await refreshBalance();
+      const cost = (before != null && after != null) ? before - after : null;
+      addCard(grid, crit, r, job, full, base, cost);
+      done++;
+    } catch (e) {
+      let msg = errText(e);
+      if (/Error 40[12]/.test(msg) && key.startsWith('pk_'))
+        msg += '\n\n⚠️ Tu llave empieza con pk_. Crea una llave secreta (sk_) en enter.pollinations.ai/keys.';
+      say((done ? 'Se generaron ' + done + ' de ' + jobs.length + '. ' : '') + msg, true);
+      refreshBalance();
+      failed = true;
+      break;
+    }
+  }
+  if (!failed) {
+    let t = 'Listo ✅';
+    if (start != null && lastBal != null && !balDenied) t += ' · gasto total aprox.: ' + fmt(start - lastBal) + ' pollen';
+    say(t);
+  }
+  $('go').disabled = false;
+};
+
+/* ---------- inicio ---------- */
+$('key').value = localStorage.getItem('pkey') || '';
+if (!$('key').value) $('keybox').open = true;
+fillStyles();
+setTab('create');
+updatePlan();
+refreshBalance();
+</script>
+</body>
+</html>

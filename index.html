@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Generador de Imágenes</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:16px;max-width:560px;margin-inline:auto;font-family:system-ui,sans-serif;background:#0f0f14;color:#eee}
+h1{font-size:1.3rem}
+label{display:block;margin:14px 0 6px;font-size:.85rem;color:#aaa}
+textarea,select,input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#1b1b24;color:#fff;font-size:1rem}
+textarea{min-height:90px}
+button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:10px;background:#7c5cff;color:#fff;font-size:1rem;font-weight:600}
+button:disabled{opacity:.5}
+#msg{margin-top:14px;text-align:center;color:#aaa}
+#out{margin-top:14px;text-align:center}
+#out img{width:100%;border-radius:12px}
+</style>
+</head>
+<body>
+<h1>🎨 Mi Generador de Imágenes</h1>
+
+<label>Tu API key (se guarda solo en tu celular)</label>
+<input id="key" type="password" placeholder="Pega tu llave aquí">
+
+<label>¿Qué quieres crear?</label>
+<textarea id="prompt" placeholder="Un zorro astronauta caminando en la luna"></textarea>
+
+<label>Estilo</label>
+<select id="style"></select>
+
+<label>Estilo personalizado (opcional)</label>
+<input id="custom" placeholder="Ej: colores pastel, estilo años 80">
+
+<label>Formato</label>
+<select id="size">
+  <option value="1024x1024">Cuadrado</option>
+  <option value="768x1344">Vertical (historias)</option>
+  <option value="1344x768">Horizontal</option>
+</select>
+
+<label>Modelo</label>
+<input id="model" value="flux">
+
+<button id="go">Generar imagen</button>
+<div id="msg"></div>
+<div id="out"></div>
+
+<script>
+const styles = {
+  "": "",
+  "Realista": "ultra realistic photograph, natural lighting, high detail",
+  "Anime": "anime style, vibrant colors, clean line art",
+  "3D animado": "3D animated movie style, soft lighting, detailed render",
+  "Óleo": "oil painting, visible brush strokes, rich textures",
+  "Acuarela": "watercolor painting, soft gradients, paper texture",
+  "Pixel art": "pixel art, 16-bit, limited palette, crisp pixels",
+  "Logo": "minimalist vector logo, flat design, clean shapes, white background",
+  "Cyberpunk": "cyberpunk, neon lights, rainy night city, cinematic",
+  "Boceto": "pencil sketch, graphite, hand drawn, crosshatching",
+  "Fantasía épica": "epic fantasy concept art, dramatic lighting, highly detailed"
+};
+
+const $ = id => document.getElementById(id);
+$('key').value = localStorage.getItem('pkey') || '';
+Object.keys(styles).forEach(k => $('style').add(new Option(k || 'Sin estilo', k)));
+
+$('go').onclick = () => {
+  const base = $('prompt').value.trim();
+  if (!base) { $('msg').textContent = 'Escribe qué quieres crear.'; return; }
+
+  const key = $('key').value.trim();
+  if (key) localStorage.setItem('pkey', key);
+
+  const full = [base, styles[$('style').value], $('custom').value.trim()]
+    .filter(Boolean).join(', ');
+  const [w, h] = $('size').value.split('x');
+  const seed = Math.floor(Math.random() * 1e9);
+  const model = $('model').value.trim() || 'flux';
+
+  let url = 'https://gen.pollinations.ai/image/' + encodeURIComponent(full) +
+    '?model=' + encodeURIComponent(model) +
+    '&width=' + w + '&height=' + h + '&seed=' + seed;
+  if (key) url += '&key=' + encodeURIComponent(key);
+
+  $('go').disabled = true;
+  $('msg').textContent = 'Generando... puede tardar unos segundos ⏳';
+  $('out').innerHTML = '';
+
+  const img = new Image();
+  img.onload = () => {
+    $('out').appendChild(img);
+    $('msg').textContent = 'Listo. Mantén presionada la imagen para guardarla.';
+    $('go').disabled = false;
+  };
+  img.onerror = () => {
+    $('msg').textContent = 'No se pudo generar. Revisa tu API key o intenta de nuevo.';
+    $('go').disabled = false;
+  };
+  img.src = url;
+};
+</script>
+</body>
+</html>

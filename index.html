@@ -3,51 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mi Generador de Imágenes</title>
+<title>Mi Estudio de Imágenes IA</title>
 <style>
+:root{--bg:#0f0f14;--card:#1b1b24;--line:#2e2e3b;--txt:#eee;--mut:#9a9ab0;--acc:#7c5cff}
 *{box-sizing:border-box}
-body{margin:0;padding:16px;max-width:560px;margin-inline:auto;font-family:system-ui,sans-serif;background:#0f0f14;color:#eee}
-h1{font-size:1.3rem}
-label{display:block;margin:14px 0 6px;font-size:.85rem;color:#aaa}
-textarea,select,input{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#1b1b24;color:#fff;font-size:1rem}
-textarea{min-height:90px}
-button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:10px;background:#7c5cff;color:#fff;font-size:1rem;font-weight:600}
+body{margin:0;padding:14px;max-width:600px;margin-inline:auto;font-family:system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+h1{font-size:1.25rem;margin:4px 0 10px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{margin:0;padding:10px;background:var(--card);border:1px solid var(--line);font-size:.9rem}
+.tabs button.on{background:var(--acc);border-color:var(--acc)}
+label{display:block;margin:12px 0 5px;font-size:.82rem;color:var(--mut)}
+textarea,select,input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:1rem}
+textarea{min-height:90px;resize:vertical}
+button{width:100%;margin-top:12px;padding:13px;border:0;border-radius:10px;background:var(--acc);color:#fff;font-size:1rem;font-weight:600}
+button.sec{background:var(--card);border:1px solid var(--line);font-weight:500}
+button.small{font-size:.9rem;padding:10px;margin-top:8px}
 button:disabled{opacity:.5}
-#msg{margin-top:14px;text-align:center;color:#aaa}
-#out{margin-top:14px;text-align:center}
-#out img{width:100%;border-radius:12px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+#msg,#keymsg,#hmsg{margin-top:12px;text-align:center;color:var(--mut);white-space:pre-wrap;font-size:.9rem}
+#keymsg{text-align:left}
+#msg.err,#keymsg.err{color:#ff8a8a}
+#out img,#preview,#viewer img{width:100%;border-radius:12px;margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.grid img,.grid div{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.grid div{display:flex;align-items:center;justify-content:center;background:var(--card);font-size:2rem}
+.hide{display:none}
+details{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+summary{color:var(--mut);font-size:.9rem}
 </style>
 </head>
 <body>
-<h1>🎨 Mi Generador de Imágenes</h1>
+<h1>🎨 Mi Estudio de Imágenes</h1>
 
-<label>Tu API key (se guarda solo en tu celular)</label>
-<input id="key" type="password" placeholder="Pega tu llave aquí">
+<div class="tabs row">
+  <button id="t-create" class="on">✨ Crear</button>
+  <button id="t-photo">📷 Foto</button>
+  <button id="t-hist">🕘 Historial</button>
+</div>
 
-<label>¿Qué quieres crear?</label>
-<textarea id="prompt" placeholder="Un zorro astronauta caminando en la luna"></textarea>
+<div id="studio">
+  <div id="photoBox" class="hide">
+    <label>Tu foto</label>
+    <input id="file" type="file" accept="image/*">
+    <img id="preview" class="hide" alt="">
+  </div>
 
-<label>Estilo</label>
-<select id="style"></select>
+  <label id="promptLabel">¿Qué quieres crear?</label>
+  <textarea id="idea"></textarea>
+  <button class="sec small" id="improve">🪄 Mejorar mi descripción con IA</button>
 
-<label>Estilo personalizado (opcional)</label>
-<input id="custom" placeholder="Ej: colores pastel, estilo años 80">
+  <label>Estilo</label>
+  <select id="style"></select>
+  <label>Estilo extra (opcional)</label>
+  <input id="custom" placeholder="Ej: colores pastel, estilo años 80">
+  <div class="row">
+    <button class="sec small" id="saveStyle">⭐ Guardar este estilo</button>
+    <button class="sec small" id="delStyle">🗑 Borrar estilo</button>
+  </div>
 
-<label>Formato</label>
-<select id="size">
-  <option value="1024x1024">Cuadrado</option>
-  <option value="768x1344">Vertical (historias)</option>
-  <option value="1344x768">Horizontal</option>
-</select>
+  <div id="sizeBox">
+    <label>Formato</label>
+    <select id="size">
+      <option value="1024x1024">Cuadrado</option>
+      <option value="768x1344">Vertical (historias)</option>
+      <option value="1344x768">Horizontal</option>
+    </select>
+  </div>
 
-<label>Modelo</label>
-<input id="model" value="flux">
+  <label>Modelo (algunos pueden gastar más saldo)</label>
+  <select id="model"></select>
 
-<button id="go">Generar imagen</button>
-<div id="msg"></div>
-<div id="out"></div>
+  <button id="go">Generar imagen</button>
+  <div id="msg"></div>
+  <div id="out"></div>
+</div>
+
+<div id="histBox" class="hide">
+  <div id="hmsg"></div>
+  <div id="grid" class="grid"></div>
+  <div id="viewer"></div>
+  <button class="sec small" id="clearHist">Borrar todo el historial</button>
+</div>
+
+<details id="keybox">
+  <summary>🔑 Llave de API</summary>
+  <label>Tu llave secreta (empieza con sk_). Se guarda solo en este teléfono.</label>
+  <input id="key" type="password" placeholder="sk_...">
+  <button class="sec small" id="saveKey">Guardar y probar llave</button>
+  <div id="keymsg"></div>
+</details>
 
 <script>
+const $ = id => document.getElementById(id);
+const API = 'https://gen.pollinations.ai';
+let mode = 'create';
+let photo = null;
+
 const styles = {
   "": "",
   "Realista": "ultra realistic photograph, natural lighting, high detail",
@@ -61,45 +113,303 @@ const styles = {
   "Boceto": "pencil sketch, graphite, hand drawn, crosshatching",
   "Fantasía épica": "epic fantasy concept art, dramatic lighting, highly detailed"
 };
+const GEN_MODELS = [
+  ['tongyi-mai/z-image-turbo', 'Z-Image Turbo (rápido, por defecto)'],
+  ['black-forest-labs/flux.1-schnell', 'FLUX Schnell (rápido)'],
+  ['black-forest-labs/flux.2-klein-4b', 'FLUX.2 Klein'],
+  ['bytedance/seedream-5.0-lite', 'Seedream 5 Lite'],
+  ['google/gemini-2.5-flash-image', 'Gemini Flash Image'],
+  ['openai/gpt-image-1-mini', 'GPT Image mini']
+];
+const EDIT_MODELS = [
+  ['black-forest-labs/flux.1-kontext-pro', 'FLUX Kontext Pro'],
+  ['black-forest-labs/flux.2-klein-4b', 'FLUX.2 Klein'],
+  ['google/gemini-2.5-flash-image', 'Gemini Flash Image'],
+  ['bytedance/seedream-4.0', 'Seedream 4'],
+  ['prunaai/p-image-edit', 'P-Image Edit']
+];
 
-const $ = id => document.getElementById(id);
-$('key').value = localStorage.getItem('pkey') || '';
-Object.keys(styles).forEach(k => $('style').add(new Option(k || 'Sin estilo', k)));
+/* ---------- utilidades ---------- */
+const getKey = () => ($('key').value || '').replace(/\s+/g, '');
+const auth = () => ({ Authorization: 'Bearer ' + getKey() });
+function say(t, err) { const m = $('msg'); m.textContent = t; m.className = err ? 'err' : ''; }
+function keysay(t, err) { const m = $('keymsg'); m.textContent = t; m.className = err ? 'err' : ''; }
+function btn(text, fn) { const b = document.createElement('button'); b.className = 'sec small'; b.textContent = text; b.onclick = fn; return b; }
+function explain(s) {
+  return ({
+    400: 'la petición no es válida para este modelo',
+    401: 'llave faltante o inválida',
+    402: 'la llave funciona, pero no hay saldo o presupuesto disponible',
+    403: 'esa llave no tiene permiso para este modelo',
+    429: 'demasiadas peticiones, espera un momento'
+  })[s] || (s >= 500 ? 'falla temporal del servicio, intenta de nuevo' : 'error desconocido');
+}
+async function httpError(r) {
+  let t = ''; try { t = (await r.text()).slice(0, 200); } catch (e) {}
+  return new Error('Error ' + r.status + ': ' + explain(r.status) + (t ? '\n' + t : ''));
+}
+function b64ToBlob(b64) {
+  const bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: 'image/png' });
+}
+async function saveBlob(blob) {
+  const file = new File([blob], 'imagen.png', { type: blob.type || 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'imagen.png'; a.click();
+}
+function resizePhoto(file, max = 1024) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? res(b) : rej(new Error('No pude leer la foto')), 'image/jpeg', 0.9);
+    };
+    img.onerror = () => rej(new Error('No pude leer la foto'));
+    img.src = URL.createObjectURL(file);
+  });
+}
 
-$('go').onclick = () => {
-  const base = $('prompt').value.trim();
-  if (!base) { $('msg').textContent = 'Escribe qué quieres crear.'; return; }
+/* ---------- historial (IndexedDB) ---------- */
+const DB = new Promise((ok, bad) => {
+  const r = indexedDB.open('studio', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('h', { keyPath: 'id' });
+  r.onsuccess = () => ok(r.result);
+  r.onerror = () => bad(r.error);
+});
+DB.catch(() => {});
+async function tx(m, fn) {
+  const db = await DB;
+  return new Promise((ok, bad) => {
+    const t = db.transaction('h', m); const q = fn(t.objectStore('h'));
+    t.oncomplete = () => ok(q && q.result); t.onerror = () => bad(t.error);
+  });
+}
+const hAdd = it => tx('readwrite', s => s.put(it));
+const hAll = () => tx('readonly', s => s.getAll());
+const hDel = id => tx('readwrite', s => s.delete(id));
+const hClear = () => tx('readwrite', s => s.clear());
 
-  const key = $('key').value.trim();
-  if (key) localStorage.setItem('pkey', key);
-
-  const full = [base, styles[$('style').value], $('custom').value.trim()]
-    .filter(Boolean).join(', ');
-  const [w, h] = $('size').value.split('x');
-  const seed = Math.floor(Math.random() * 1e9);
-  const model = $('model').value.trim() || 'flux';
-
-  let url = 'https://gen.pollinations.ai/image/' + encodeURIComponent(full) +
-    '?model=' + encodeURIComponent(model) +
-    '&width=' + w + '&height=' + h + '&seed=' + seed;
-  if (key) url += '&key=' + encodeURIComponent(key);
-
-  $('go').disabled = true;
-  $('msg').textContent = 'Generando... puede tardar unos segundos ⏳';
-  $('out').innerHTML = '';
-
-  const img = new Image();
-  img.onload = () => {
-    $('out').appendChild(img);
-    $('msg').textContent = 'Listo. Mantén presionada la imagen para guardarla.';
-    $('go').disabled = false;
-  };
-  img.onerror = () => {
-    $('msg').textContent = 'No se pudo generar. Revisa tu API key o intenta de nuevo.';
-    $('go').disabled = false;
-  };
-  img.src = url;
+async function renderHist() {
+  const g = $('grid'); g.innerHTML = ''; $('viewer').innerHTML = ''; $('hmsg').textContent = '';
+  let items = [];
+  try { items = (await hAll()).sort((a, b) => b.id - a.id); }
+  catch (e) { $('hmsg').textContent = 'Tu navegador no permite guardar historial.'; return; }
+  if (!items.length) { $('hmsg').textContent = 'Aún no hay imágenes. ¡Crea la primera!'; return; }
+  items.forEach(it => {
+    let el;
+    if (it.blob) { el = new Image(); el.src = URL.createObjectURL(it.blob); }
+    else { el = document.createElement('div'); el.textContent = '🖼️'; }
+    el.onclick = () => openItem(it);
+    g.appendChild(el);
+  });
+}
+function openItem(it) {
+  const v = $('viewer'); v.innerHTML = '';
+  if (it.blob) { const im = new Image(); im.src = URL.createObjectURL(it.blob); v.appendChild(im); }
+  const p = document.createElement('p');
+  p.style.cssText = 'color:var(--mut);font-size:.85rem';
+  p.textContent = (it.mode === 'photo' ? '📷 ' : '✨ ') + it.prompt;
+  v.appendChild(p);
+  v.appendChild(btn('✏️ Usar esta descripción', () => { $('idea').value = it.base || it.prompt; setTab(it.mode === 'photo' ? 'photo' : 'create'); }));
+  if (it.blob) v.appendChild(btn('💾 Guardar / compartir', () => saveBlob(it.blob)));
+  v.appendChild(btn('🗑 Borrar esta imagen', async () => { await hDel(it.id); renderHist(); }));
+  v.scrollIntoView({ behavior: 'smooth' });
+}
+$('clearHist').onclick = async () => {
+  if (confirm('¿Borrar todo el historial?')) { try { await hClear(); } catch (e) {} renderHist(); }
 };
+
+/* ---------- estilos ---------- */
+const myStyles = () => JSON.parse(localStorage.getItem('mystyles') || '{}');
+function fillStyles() {
+  const s = $('style'), cur = s.value;
+  s.innerHTML = '';
+  Object.keys(styles).forEach(k => s.add(new Option(k || 'Sin estilo', 'b:' + k)));
+  const names = Object.keys(myStyles());
+  if (names.length) {
+    const g = document.createElement('optgroup'); g.label = '⭐ Mis estilos';
+    names.forEach(n => g.appendChild(new Option(n, 'm:' + n)));
+    s.appendChild(g);
+  }
+  if ([...s.options].some(o => o.value === cur)) s.value = cur;
+}
+function styleText() {
+  const v = $('style').value;
+  return v.startsWith('b:') ? styles[v.slice(2)] : (myStyles()[v.slice(2)] || '');
+}
+$('saveStyle').onclick = () => {
+  const txt = $('custom').value.trim();
+  if (!txt) return say('Escribe tu estilo en "Estilo extra" y luego toca Guardar.', true);
+  const name = (window.prompt('Nombre para tu estilo:') || '').trim();
+  if (!name) return;
+  const mine = myStyles(); mine[name] = txt;
+  localStorage.setItem('mystyles', JSON.stringify(mine));
+  fillStyles(); $('style').value = 'm:' + name; say('Estilo guardado ⭐');
+};
+$('delStyle').onclick = () => {
+  const v = $('style').value;
+  if (!v.startsWith('m:')) return say('Elige uno de "Mis estilos" para borrarlo.', true);
+  const mine = myStyles(); delete mine[v.slice(2)];
+  localStorage.setItem('mystyles', JSON.stringify(mine));
+  fillStyles(); say('Estilo borrado.');
+};
+
+/* ---------- pestañas ---------- */
+function fillModels() {
+  const list = mode === 'photo' ? EDIT_MODELS : GEN_MODELS;
+  const prev = $('model').value;
+  $('model').innerHTML = '';
+  list.forEach(([v, t]) => $('model').add(new Option(t, v)));
+  if (list.some(m => m[0] === prev)) $('model').value = prev;
+}
+function setTab(m) {
+  mode = m;
+  ['create', 'photo', 'hist'].forEach(x => $('t-' + x).classList.toggle('on', x === m));
+  $('studio').classList.toggle('hide', m === 'hist');
+  $('histBox').classList.toggle('hide', m !== 'hist');
+  $('photoBox').classList.toggle('hide', m !== 'photo');
+  $('sizeBox').classList.toggle('hide', m !== 'create');
+  $('promptLabel').textContent = m === 'photo' ? '¿Qué quieres cambiar de la foto?' : '¿Qué quieres crear?';
+  $('idea').placeholder = m === 'photo'
+    ? 'Conviértela en pintura al óleo / ponle un sombrero'
+    : 'Un zorro astronauta caminando en la luna';
+  $('out').innerHTML = ''; say('');
+  fillModels();
+  if (m === 'hist') renderHist();
+}
+['create', 'photo', 'hist'].forEach(x => $('t-' + x).onclick = () => setTab(x));
+
+$('file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    photo = await resizePhoto(f);
+    const p = $('preview'); p.src = URL.createObjectURL(photo); p.classList.remove('hide');
+  } catch (err) { say(err.message, true); }
+};
+
+/* ---------- llave ---------- */
+$('saveKey').onclick = async () => {
+  const k = getKey();
+  if (!k) return keysay('Pega tu llave primero.', true);
+  localStorage.setItem('pkey', k);
+  const warn = k.startsWith('pk_')
+    ? '⚠️ Tu llave empieza con pk_. Para esta app crea una llave secreta (sk_) en enter.pollinations.ai/keys.\n\n' : '';
+  keysay(warn + 'Probando...', !!warn);
+  try {
+    const r = await fetch(API + '/account/balance', { headers: auth() });
+    const t = (await r.text()).slice(0, 200);
+    if (r.ok) keysay(warn + '✅ Llave válida.\n' + t, !!warn);
+    else keysay(warn + '❌ Error ' + r.status + ': ' + explain(r.status) + '\n' + t, true);
+  } catch (e) {
+    keysay(warn + 'No pude hacer la prueba (' + e.message + '). Intenta generar una imagen de todos modos.', true);
+  }
+};
+
+/* ---------- mejorar descripción ---------- */
+$('improve').onclick = async () => {
+  const idea = $('idea').value.trim();
+  if (!idea) return say('Escribe primero tu idea.', true);
+  if (!getKey()) { $('keybox').open = true; return say('Primero pega tu llave en la sección 🔑.', true); }
+  const sys = mode === 'photo'
+    ? 'Rewrite the user request as one clear, concise English instruction for editing a photo. Reply ONLY with the instruction.'
+    : 'You are an expert prompt writer for AI image generators. Rewrite the user idea as ONE vivid, detailed English prompt (subject, setting, lighting, composition, mood, details). Keep the original intent. Reply ONLY with the prompt, no quotes or explanations.';
+  $('improve').disabled = true; say('Mejorando descripción... ✍️');
+  try {
+    const r = await fetch(API + '/v1/chat/completions', {
+      method: 'POST',
+      headers: { ...auth(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'system', content: sys }, { role: 'user', content: idea }] })
+    });
+    if (!r.ok) throw await httpError(r);
+    const j = await r.json();
+    $('idea').value = j.choices[0].message.content.trim();
+    say('Listo ✨ Puedes editarla antes de generar.');
+  } catch (e) {
+    say(e instanceof TypeError ? 'No pude conectar con el servicio.' : e.message, true);
+  }
+  $('improve').disabled = false;
+};
+
+/* ---------- generar ---------- */
+async function editPhoto(prompt, model) {
+  const fd = new FormData();
+  fd.append('image', photo, 'foto.jpg');
+  fd.append('prompt', prompt);
+  fd.append('model', model);
+  const r = await fetch(API + '/v1/images/edits', { method: 'POST', headers: auth(), body: fd });
+  if (!r.ok) throw await httpError(r);
+  const j = await r.json();
+  const d = j.data && j.data[0];
+  if (d && d.b64_json) return b64ToBlob(d.b64_json);
+  if (d && d.url) return await (await fetch(d.url)).blob();
+  throw new Error('La respuesta no trajo imagen.');
+}
+const show = (blob, plainUrl, full, base) => new Promise(res => {
+  const im = new Image();
+  im.onload = () => {
+    $('out').innerHTML = ''; $('out').appendChild(im);
+    if (blob) $('out').appendChild(btn('💾 Guardar / compartir', () => saveBlob(blob)));
+    say('Listo ✅' + (blob ? '' : ' Mantén presionada la imagen para guardarla.'));
+    hAdd({ id: Date.now(), mode, prompt: full, base, blob }).catch(() => {});
+    res();
+  };
+  im.onerror = () => { say('La imagen no se pudo mostrar. Revisa tu llave (debe empezar con sk_) e intenta de nuevo.', true); res(); };
+  im.src = blob ? URL.createObjectURL(blob) : plainUrl;
+});
+
+$('go').onclick = async () => {
+  const base = $('idea').value.trim();
+  if (!base) return say('Escribe qué quieres crear.', true);
+  const key = getKey();
+  if (!key) { $('keybox').open = true; return say('Primero pega tu llave en la sección 🔑.', true); }
+  if (mode === 'photo' && !photo) return say('Elige una foto primero.', true);
+  localStorage.setItem('pkey', key);
+
+  const full = [base, styleText(), $('custom').value.trim()].filter(Boolean).join(', ');
+  const model = $('model').value;
+  $('go').disabled = true; $('out').innerHTML = '';
+  say('Generando... ⏳ (puede tardar hasta un minuto)');
+  try {
+    let blob = null, plainUrl = null;
+    if (mode === 'create') {
+      const [w, h] = $('size').value.split('x');
+      const url = API + '/image/' + encodeURIComponent(full) +
+        '?model=' + encodeURIComponent(model) + '&width=' + w + '&height=' + h +
+        '&seed=' + Math.floor(Math.random() * 1e9);
+      try {
+        const r = await fetch(url, { headers: auth() });
+        if (!r.ok) throw await httpError(r);
+        blob = await r.blob();
+      } catch (e) {
+        if (e instanceof TypeError) plainUrl = url + '&key=' + encodeURIComponent(key); // plan B
+        else throw e;
+      }
+    } else {
+      blob = await editPhoto(full, model);
+    }
+    await show(blob, plainUrl, full, base);
+  } catch (e) {
+    let msg = e instanceof TypeError ? 'No pude conectar con el servicio (red o bloqueo del navegador). Intenta de nuevo.' : (e.message || String(e));
+    if (/Error 40[12]/.test(msg) && key.startsWith('pk_'))
+      msg += '\n\n⚠️ Tu llave empieza con pk_. Crea una llave secreta (sk_) en enter.pollinations.ai/keys.';
+    say(msg, true);
+  }
+  $('go').disabled = false;
+};
+
+/* ---------- inicio ---------- */
+$('key').value = localStorage.getItem('pkey') || '';
+if (!$('key').value) $('keybox').open = true;
+fillStyles();
+setTab('create');
 </script>
 </body>
 </html>

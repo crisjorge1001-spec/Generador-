@@ -9,7 +9,9 @@
 *{box-sizing:border-box}
 body{margin:0;padding:14px;max-width:600px;margin-inline:auto;font-family:system-ui,sans-serif;background:var(--bg);color:var(--txt)}
 h1{font-size:1.25rem;margin:4px 0 10px}
-.tabs{display:flex;gap:6px;margin-bottom:12px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:.88rem;color:var(--mut)}
+.bar button{width:auto;margin:0;padding:8px 12px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
 .tabs button{margin:0;padding:10px;background:var(--card);border:1px solid var(--line);font-size:.9rem}
 .tabs button.on{background:var(--acc);border-color:var(--acc)}
 label{display:block;margin:12px 0 5px;font-size:.82rem;color:var(--mut)}
@@ -23,11 +25,20 @@ button:disabled{opacity:.5}
 .row>*{flex:1}
 #msg,#keymsg,#hmsg{margin-top:12px;text-align:center;color:var(--mut);white-space:pre-wrap;font-size:.9rem}
 #keymsg{text-align:left}
-#msg.err,#keymsg.err{color:#ff8a8a}
-#out img,#preview,#viewer img{width:100%;border-radius:12px;margin-top:12px}
+#msg.err,#keymsg.err,#anaOut.err,#opinion.err{color:#ff8a8a}
+#preview,#preview2,#viewer img{width:100%;border-radius:12px;margin-top:12px}
+#out{margin-top:12px}
+#out.cols2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#opinion{margin-top:12px}
+.res img{width:100%;border-radius:10px;display:block}
+.res .cap{font-size:.78rem;color:var(--mut);margin-top:4px}
+.res button{font-size:.82rem;padding:8px;margin-top:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.92rem}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
-.grid img,.grid div{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-.grid div{display:flex;align-items:center;justify-content:center;background:var(--card);font-size:2rem}
+.grid .t{position:relative;aspect-ratio:1;cursor:pointer}
+.grid .t img,.grid .t .ph{width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.grid .t .ph{display:flex;align-items:center;justify-content:center;background:var(--card);font-size:2rem}
+.grid .t .star{position:absolute;top:3px;right:5px;font-size:.95rem}
 .hide{display:none}
 details{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 summary{color:var(--mut);font-size:.9rem}
@@ -35,10 +46,12 @@ summary{color:var(--mut);font-size:.9rem}
 </head>
 <body>
 <h1>🎨 Mi Estudio de Imágenes</h1>
+<div class="bar"><span id="bal">💰 Saldo: sin consultar</span><button class="sec small" id="refBal">Actualizar</button></div>
 
-<div class="tabs row">
+<div class="tabs">
   <button id="t-create" class="on">✨ Crear</button>
   <button id="t-photo">📷 Foto</button>
+  <button id="t-describe">🔍 Describir imagen</button>
   <button id="t-hist">🕘 Historial</button>
 </div>
 
@@ -71,18 +84,55 @@ summary{color:var(--mut);font-size:.9rem}
     </select>
   </div>
 
-  <label>Modelo (algunos pueden gastar más saldo)</label>
+  <label>Modelo (algunos gastan más saldo)</label>
   <select id="model"></select>
 
-  <button id="go">Generar imagen</button>
+  <div id="countBox">
+    <label>Cantidad (cada imagen gasta saldo)</label>
+    <select id="count">
+      <option value="1">1 imagen</option>
+      <option value="2">2 variaciones</option>
+      <option value="3">3 variaciones</option>
+      <option value="4">4 variaciones</option>
+    </select>
+  </div>
+
+  <label style="display:flex;align-items:center;gap:8px;margin-top:14px;color:var(--txt);font-size:.9rem">
+    <input id="cmp" type="checkbox" style="width:auto;padding:0"> Comparar con otro modelo (la misma idea en 2 modelos)
+  </label>
+  <div id="model2Box" class="hide">
+    <label>Segundo modelo</label>
+    <select id="model2"></select>
+  </div>
+
+  <button id="go">Generar</button>
   <div id="msg"></div>
   <div id="out"></div>
+  <div id="opinion"></div>
+</div>
+
+<div id="describeBox" class="hide">
+  <label>Sube una imagen: te digo qué veo, te doy un prompt listo para generar y una opinión.</label>
+  <input id="file2" type="file" accept="image/*">
+  <img id="preview2" class="hide" alt="">
+  <button id="analyze">Analizar imagen</button>
+  <div id="anaOut" style="margin-top:12px"></div>
 </div>
 
 <div id="histBox" class="hide">
+  <div class="row">
+    <select id="hfilter" style="flex:0 0 42%">
+      <option value="all">Todas</option>
+      <option value="fav">⭐ Favoritas</option>
+    </select>
+    <input id="hsearch" placeholder="Buscar en prompts...">
+  </div>
   <div id="hmsg"></div>
   <div id="grid" class="grid"></div>
   <div id="viewer"></div>
+  <button class="sec small" id="exportH">📤 Exportar lo que estoy viendo (.json)</button>
+  <label>Importar un respaldo (.json)</label>
+  <input id="importFile" type="file" accept=".json,application/json">
   <button class="sec small" id="clearHist">Borrar todo el historial</button>
 </div>
 
@@ -97,8 +147,12 @@ summary{color:var(--mut);font-size:.9rem}
 <script>
 const $ = id => document.getElementById(id);
 const API = 'https://gen.pollinations.ai';
+const TABS = ['create', 'photo', 'describe', 'hist'];
 let mode = 'create';
-let photo = null;
+let photo = null, photo2 = null;
+let lastBal = null, balDenied = false;
+let viewItems = [];
+let seq = 0;
 
 const styles = {
   "": "",
@@ -128,39 +182,45 @@ const EDIT_MODELS = [
   ['bytedance/seedream-4.0', 'Seedream 4'],
   ['prunaai/p-image-edit', 'P-Image Edit']
 ];
+const modelName = v => ([...GEN_MODELS, ...EDIT_MODELS].find(m => m[0] === v) || [v, v])[1];
 
 /* ---------- utilidades ---------- */
 const getKey = () => ($('key').value || '').replace(/\s+/g, '');
 const auth = () => ({ Authorization: 'Bearer ' + getKey() });
+const fmt = n => Number.isFinite(n) ? String(Math.round(n * 10000) / 10000) : '?';
+const newId = () => Date.now() + (seq++ % 1000) / 1000;
+const extOf = b => ((b.type || '').split('/')[1] || 'png').replace('jpeg', 'jpg').split('+')[0];
 function say(t, err) { const m = $('msg'); m.textContent = t; m.className = err ? 'err' : ''; }
 function keysay(t, err) { const m = $('keymsg'); m.textContent = t; m.className = err ? 'err' : ''; }
 function btn(text, fn) { const b = document.createElement('button'); b.className = 'sec small'; b.textContent = text; b.onclick = fn; return b; }
+const errText = e => e instanceof TypeError ? 'No pude conectar con el servicio (red o bloqueo del navegador).' : (e.message || String(e));
 function explain(s) {
   return ({
     400: 'la petición no es válida para este modelo',
     401: 'llave faltante o inválida',
-    402: 'la llave funciona, pero no hay saldo o presupuesto disponible',
-    403: 'esa llave no tiene permiso para este modelo',
+    402: 'se acabó el saldo (pollen) o el límite de esta llave. Revisa tu panel en enter.pollinations.ai',
+    403: 'esa llave no tiene permiso para esto',
     429: 'demasiadas peticiones, espera un momento'
   })[s] || (s >= 500 ? 'falla temporal del servicio, intenta de nuevo' : 'error desconocido');
 }
 async function httpError(r) {
   let t = ''; try { t = (await r.text()).slice(0, 200); } catch (e) {}
-  return new Error('Error ' + r.status + ': ' + explain(r.status) + (t ? '\n' + t : ''));
+  const err = new Error('Error ' + r.status + ': ' + explain(r.status) + (t ? '\n' + t : ''));
+  err.status = r.status; return err;
 }
 function b64ToBlob(b64) {
   const bin = atob(b64), arr = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
   return new Blob([arr], { type: 'image/png' });
 }
-async function saveBlob(blob) {
-  const file = new File([blob], 'imagen.png', { type: blob.type || 'image/png' });
+async function saveFile(blob, name) {
+  const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file] }); return; }
     catch (e) { if (e.name === 'AbortError') return; }
   }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'imagen.png'; a.click();
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
 }
 function resizePhoto(file, max = 1024) {
   return new Promise((res, rej) => {
@@ -170,12 +230,38 @@ function resizePhoto(file, max = 1024) {
       const c = document.createElement('canvas');
       c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      c.toBlob(b => b ? res(b) : rej(new Error('No pude leer la foto')), 'image/jpeg', 0.9);
+      c.toBlob(b => b ? res(b) : rej(new Error('No pude leer la imagen')), 'image/jpeg', 0.9);
     };
-    img.onerror = () => rej(new Error('No pude leer la foto'));
+    img.onerror = () => rej(new Error('No pude leer la imagen'));
     img.src = URL.createObjectURL(file);
   });
 }
+const toDataUrl = blob => new Promise((ok, bad) => {
+  const f = new FileReader(); f.onload = () => ok(f.result); f.onerror = () => bad(f.error); f.readAsDataURL(blob);
+});
+
+/* ---------- saldo ---------- */
+async function refreshBalance() {
+  if (!getKey()) { $('bal').textContent = '💰 Saldo: pega tu llave primero'; return null; }
+  try {
+    const r = await fetch(API + '/account/balance', { headers: auth() });
+    if (r.status === 403) {
+      balDenied = true;
+      $('bal').textContent = '💰 Tu llave no tiene permiso para ver el saldo. Míralo en enter.pollinations.ai';
+      return null;
+    }
+    if (!r.ok) throw new Error('x');
+    balDenied = false;
+    const j = await r.json();
+    lastBal = Number(j.balance);
+    $('bal').textContent = '💰 Saldo: ' + fmt(lastBal) + ' pollen';
+    return lastBal;
+  } catch (e) {
+    $('bal').textContent = '💰 No pude consultar el saldo';
+    return null;
+  }
+}
+$('refBal').onclick = () => { balDenied = false; refreshBalance(); };
 
 /* ---------- historial (IndexedDB) ---------- */
 const DB = new Promise((ok, bad) => {
@@ -193,38 +279,162 @@ async function tx(m, fn) {
   });
 }
 const hAdd = it => tx('readwrite', s => s.put(it));
+const hGet = id => tx('readonly', s => s.get(id));
 const hAll = () => tx('readonly', s => s.getAll());
 const hDel = id => tx('readwrite', s => s.delete(id));
 const hClear = () => tx('readwrite', s => s.clear());
-
-async function renderHist() {
-  const g = $('grid'); g.innerHTML = ''; $('viewer').innerHTML = ''; $('hmsg').textContent = '';
-  let items = [];
-  try { items = (await hAll()).sort((a, b) => b.id - a.id); }
-  catch (e) { $('hmsg').textContent = 'Tu navegador no permite guardar historial.'; return; }
-  if (!items.length) { $('hmsg').textContent = 'Aún no hay imágenes. ¡Crea la primera!'; return; }
-  items.forEach(it => {
-    let el;
-    if (it.blob) { el = new Image(); el.src = URL.createObjectURL(it.blob); }
-    else { el = document.createElement('div'); el.textContent = '🖼️'; }
-    el.onclick = () => openItem(it);
-    g.appendChild(el);
-  });
+async function toggleFav(id) {
+  const it = await hGet(id); it.fav = !it.fav; await hAdd(it); return it.fav;
 }
-function openItem(it) {
+
+async function renderHist(openId) {
+  const g = $('grid'); g.innerHTML = ''; $('viewer').innerHTML = ''; $('hmsg').textContent = '';
+  let all = [];
+  try { all = (await hAll()).sort((a, b) => b.id - a.id); }
+  catch (e) { viewItems = []; $('hmsg').textContent = 'Tu navegador no permite guardar historial.'; return; }
+  const q = $('hsearch').value.trim().toLowerCase();
+  let items = all;
+  if ($('hfilter').value === 'fav') items = items.filter(i => i.fav);
+  if (q) items = items.filter(i => (i.prompt || '').toLowerCase().includes(q));
+  viewItems = items;
+  $('hmsg').textContent = !all.length ? 'Aún no hay imágenes. ¡Crea la primera!'
+    : (!items.length ? 'Nada coincide con tu búsqueda.' : 'Mostrando ' + items.length + ' de ' + all.length);
+  items.forEach(it => {
+    const t = document.createElement('div'); t.className = 't';
+    let el;
+    if (it.blob) { el = new Image(); el.loading = 'lazy'; el.src = URL.createObjectURL(it.blob); }
+    else { el = document.createElement('div'); el.className = 'ph'; el.textContent = '🖼️'; }
+    t.appendChild(el);
+    if (it.fav) { const s = document.createElement('span'); s.className = 'star'; s.textContent = '⭐'; t.appendChild(s); }
+    t.onclick = () => openItem(it);
+    g.appendChild(t);
+  });
+  if (openId) { const it = all.find(i => i.id === openId); if (it) openItem(it, false); }
+}
+function openItem(it, scroll = true) {
   const v = $('viewer'); v.innerHTML = '';
   if (it.blob) { const im = new Image(); im.src = URL.createObjectURL(it.blob); v.appendChild(im); }
+  const meta = [
+    new Date(Math.floor(it.id)).toLocaleString(),
+    it.model ? modelName(it.model) : null,
+    it.cost != null ? fmt(it.cost) + ' pollen' : null
+  ].filter(Boolean).join(' · ');
   const p = document.createElement('p');
-  p.style.cssText = 'color:var(--mut);font-size:.85rem';
-  p.textContent = (it.mode === 'photo' ? '📷 ' : '✨ ') + it.prompt;
+  p.style.cssText = 'color:var(--mut);font-size:.85rem;white-space:pre-wrap';
+  p.textContent = (it.fav ? '⭐ ' : '') + (it.mode === 'photo' ? '📷 ' : '✨ ') + it.prompt + '\n' + meta;
   v.appendChild(p);
   v.appendChild(btn('✏️ Usar esta descripción', () => { $('idea').value = it.base || it.prompt; setTab(it.mode === 'photo' ? 'photo' : 'create'); }));
-  if (it.blob) v.appendChild(btn('💾 Guardar / compartir', () => saveBlob(it.blob)));
+  v.appendChild(btn(it.fav ? '⭐ Quitar de favoritas' : '☆ Marcar como favorita', async () => { await toggleFav(it.id); renderHist(it.id); }));
+  if (it.blob) v.appendChild(btn('💾 Guardar / compartir', () => saveFile(it.blob, 'imagen.' + extOf(it.blob))));
   v.appendChild(btn('🗑 Borrar esta imagen', async () => { await hDel(it.id); renderHist(); }));
-  v.scrollIntoView({ behavior: 'smooth' });
+  if (scroll) v.scrollIntoView({ behavior: 'smooth' });
 }
+$('hfilter').onchange = () => renderHist();
+let ht;
+$('hsearch').oninput = () => { clearTimeout(ht); ht = setTimeout(() => renderHist(), 250); };
 $('clearHist').onclick = async () => {
-  if (confirm('¿Borrar todo el historial?')) { try { await hClear(); } catch (e) {} renderHist(); }
+  if (confirm('¿Borrar TODO el historial, incluidas las favoritas?')) { try { await hClear(); } catch (e) {} renderHist(); }
+};
+$('exportH').onclick = async () => {
+  if (!viewItems.length) { $('hmsg').textContent = 'No hay nada que exportar con este filtro.'; return; }
+  $('hmsg').textContent = 'Preparando respaldo... 📦';
+  try {
+    const items = [];
+    for (const it of viewItems) {
+      items.push({
+        id: it.id, mode: it.mode, prompt: it.prompt, base: it.base, model: it.model,
+        label: it.label, cost: it.cost, fav: !!it.fav, img: it.blob ? await toDataUrl(it.blob) : null
+      });
+    }
+    const blob = new Blob([JSON.stringify({ app: 'estudio-imagenes', version: 1, items })], { type: 'application/json' });
+    await saveFile(blob, 'respaldo-estudio-' + new Date().toISOString().slice(0, 10) + '.json');
+    $('hmsg').textContent = '✅ Respaldo listo (' + items.length + ' imágenes).';
+  } catch (e) { $('hmsg').textContent = 'No pude crear el respaldo: ' + e.message; }
+};
+$('importFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  $('hmsg').textContent = 'Importando... 📥';
+  try {
+    const data = JSON.parse(await f.text());
+    if (!data || !Array.isArray(data.items)) throw new Error('el archivo no es un respaldo válido');
+    let n = 0;
+    for (const it of data.items) {
+      const blob = it.img ? await (await fetch(it.img)).blob() : null;
+      await hAdd({
+        id: it.id, mode: it.mode, prompt: it.prompt, base: it.base, model: it.model,
+        label: it.label, cost: it.cost, fav: !!it.fav, blob
+      });
+      n++;
+    }
+    await renderHist();
+    $('hmsg').textContent = '✅ Importadas ' + n + ' imágenes.';
+  } catch (err) { $('hmsg').textContent = 'No pude importar: ' + err.message; }
+};
+
+/* ---------- estilos ---------- */
+const myStyles = () => JSON.parse(localStorage.getItem('mystyles') || '{}');
+function fillStyles() {
+  const s = $('style'), cur = s.value;
+  s.innerHTML = '';
+  Object.keys(styles).forEach(k => s.add(new Option(k || 'Sin estilo', 'b:' + k)));
+  const names = Object.keys(myStyles());
+  if (names.length) {
+    const g = document.createElement('optgroup'); g.label = '⭐ Mis estilos';
+    names.forEach(n => g.appendChild(new Option(n, 'm:' + n)));
+    s.appendChild(g);
+  }
+  if ([...s.options].some(o => o.value === cur)) s.value = cur;
+}
+function styleText() {
+  const v = $('style').value;
+  return v.startsWith('b:') ? styles[v.slice(2)] : (myStyles()[v.slice(2)] || '');
+}
+$('saveStyle').onclick = () => {
+  const txt = $('custom').value.trim();
+  if (!txt) return say('Escribe tu estilo en "Estilo extra" y luego toca Guardar.', true);
+  const name = (window.prompt('Nombre para tu estilo:') || '').trim();
+  if (!name) return;
+  const mine = myStyles(); mine[name] = txt;
+  localStorage.setItem('mystyles', JSON.stringify(mine));
+  fillStyles(); $('style').value = 'm:' + name; say('Estilo guardado ⭐');
+};
+$('delStyle').onclick = () => {
+  const v = $('style').value;
+  if (!v.startsWith('m:')) return say('Elige uno de "Mis estilos" para borrarlo.', true);
+  const mine = myStyles(); delete mine[v.slice(2)];
+  localStorage.setItem('mystyles', JSON.stringify(mine));
+  fillStyles(); say('Estilo borrado.');
+};
+
+/* ---------- pestañas y opciones ---------- */
+function fillModels() {
+  const list = mode === 'photo' ? EDIT_MODELS : GEN_MODELS;
+  [['model', 0], ['model2', 1]].forEach(([id, def]) => {
+    const s = $(id), prev = s.value;
+    s.innerHTML = '';
+    list.forEach(([v, t]) => s.add(new Option(t, v)));
+    s.value = list.some(m => m[0] === prev) ? prev : list[Math.min(def, list.length - 1)][0];
+  });
+}
+function syncOptions() {
+  const cmp = $('cmp').checked;
+  $('countBox').classList.toggle('hide', cmp || mode !== 'create');
+  $('model2Box').classList.toggle('hide', !cmp);
+}
+$('cmp').onchange = syncOptions;
+function setTab(m) {
+  const changed = m !== mode;
+  mode = m;
+  TABS.forEach(x => $('t-' + x).classList.toggle('on', x === m));
+  const studio = m === 'create' || m === 'photo';
+  $('studio').classList.toggle('hide', !studio);
+  $('describeBox').classList.toggle('hide', m !== 'describe');
+  $('histBox').classList.toggle('hide', m !== 'hist');
+  $('photoBox').classList.toggle('hide', m !== 'photo');
+  $('sizeBox').classList.toggle('hide', m !== 'create');
+  $('promptLabel').textContent = m === 'photo' ? '¿Qué quieres cambiar de la foto?' : '¿Qué quieres crear?';
+  $('idea').placeholder = m === 'photo'
+   todo el historial?')) { try { await hClear(); } catch (e) {} renderHist(); }
 };
 
 /* ---------- estilos ---------- */
